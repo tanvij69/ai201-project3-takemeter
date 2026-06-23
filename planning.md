@@ -119,3 +119,40 @@ Could be analysis (breaking down what happened tactically) or hot_take (surface-
 
 **3. "Anyway, his situation is morbidly funny. 3 UCLs between his 2 clubs in 3 years and him not winning any."**
 Could be reaction (expressing amusement) or analysis (using a stat to make a point). Labeled **analysis** — the specific stat (3 UCLs, 3 years, 0 wins) is the actual substance of the point, not just color for a feeling.
+
+---
+
+## Evaluation Metrics
+
+I'll use the following metrics to evaluate both the fine-tuned DistilBERT model and the Groq zero-shot baseline:
+
+- **Accuracy** — overall percentage of correct predictions across all three labels. Useful as a quick summary but not enough on its own because it can hide per-class failures.
+- **Per-class F1 score** — the harmonic mean of precision and recall for each label individually. This matters because my dataset isn't perfectly balanced, and I want to know if the model is systematically failing on one label (e.g. always missing hot_take but getting reaction right).
+- **Confusion matrix** — shows exactly which labels are getting mixed up with each other. I expect the hardest boundary to be hot_take vs analysis, so I'll specifically look at how often those two get swapped.
+
+Accuracy alone isn't enough here because a model that just predicts "reaction" for everything would get ~38% accuracy given my distribution — that's not a useful classifier. F1 per class tells me whether the model is actually learning the distinctions.
+
+---
+
+## Definition of Success
+
+For this classifier to be genuinely useful in a real community tool, I'd set these thresholds:
+
+- **Overall accuracy ≥ 70%** on the test set for the fine-tuned model
+- **F1 ≥ 0.60 for each individual label** — no single label should be completely missed
+- **Fine-tuned model outperforms the Groq zero-shot baseline** by at least 5 percentage points in overall accuracy — otherwise fine-tuning didn't add value
+
+"Good enough for deployment" means the model correctly classifies at least 7 out of 10 posts, and doesn't systematically fail on any one label. If the model hits 85%+ accuracy, I'll check for test set leakage or labels that are too easy.
+
+---
+
+## AI Tool Plan
+
+**Label stress-testing:**
+I used Claude to generate boundary posts between hot_take and analysis — the hardest pair in my taxonomy. Examples like "Iraq made so many fatal errors, 1 error led to goal 1, another led to goal 2" came from this process. Posts I couldn't classify cleanly forced me to tighten the decision rule: real analysis requires verifiable evidence, not just a breakdown of what happened.
+
+**Annotation assistance:**
+I used Claude to pre-label the full dataset of 261 examples using my label definitions and decision rules. I reviewed the distribution and spot-checked ~30 rows manually to verify the labels made sense. All pre-labeled examples are disclosed here — the full dataset was AI-assisted with human review.
+
+**Failure analysis:**
+After running the model, I'll feed the list of wrong predictions to Claude and ask it to identify patterns (e.g. "does it consistently confuse short hot_takes with reactions?" or "does it fail on quotes from experts?"). I'll verify any patterns it identifies by manually reviewing those examples myself before writing up the evaluation.
