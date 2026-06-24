@@ -6,7 +6,7 @@ A fine-tuned text classifier that evaluates discourse quality in the r/soccer su
 
 ## Community Choice
 
-I chose r/soccer because it's one of the most active sports communities on the internet with over 8 million members. Posts range from stat posts and historical records to heated opinions and fan reactions — exactly the kind of variation needed for a classification task. The three labels I defined (analysis, hot_take, reaction) map onto distinctions the community itself makes constantly: calling out bad takes and praising good analysis is part of how r/soccer operates.
+There are many people participating in r/soccer over 8 million people. Because of this large size, there are many different kinds of posts, for example, stats and historical data, as well as very heated and opinionated posts made by fans. All these types of posts are good examples of the kinds of post variations I need for my classification task. In terms of posting types, I developed 3 categories (analysis, hot_take, reaction) based on how this subreddit works. Users regularly identify bad takes from others and provide positive feedback for good analysis.
 
 ---
 
@@ -64,7 +64,7 @@ I chose r/soccer because it's one of the most active sports communities on the i
 - Learning rate: 2e-5
 - Batch size: 16
 
-**Hyperparameter decision:** I kept the default 3 epochs rather than increasing them because validation loss was still decreasing at epoch 3 (0.975 vs 1.075 at epoch 2), suggesting the model hadn't overfit yet. With only 182 training examples, running more epochs risked overfitting.
+**Hyperparameter decision:** I kept the default 3 epochs rather than increasing them because the validation loss was still decreasing at epoch 3 (0.975 vs. 1.075 at epoch 2), suggesting the model hadn’t overfit yet. With only 182 training examples, running more epochs would have increased the risk of overfitting.
 
 **Train/validation/test split:** 70% / 15% / 15% (182 train, 39 validation, 40 test) — handled automatically by the notebook.
 
@@ -135,17 +135,17 @@ The model never predicted analysis. Every analysis example was classified as eit
 **Wrong prediction #1**
 - Text: "Deschamps has led France to 16 wins in 21 World Cup matches, matching Helmut Schon's all time record."
 - True label: analysis | Predicted: reaction (confidence: 0.40)
-- Analysis: This is a clear stat post with a historical comparison — exactly what analysis is defined as. The model predicted reaction, likely because the sentence structure ("Deschamps has led France...") resembles the factual, news-style phrasing common in reaction posts like goal clip titles and transfer announcements. The model appears to have learned surface phrasing patterns rather than whether evidence is being used to support a claim.
+- Analysis: This is a clear example of a stats post and a historical comparison and therefore is certainly what analysis is. The prediction of the reaction was likely due to the fact that the sentence structure used here may be similar to what you would typically see in reaction posts and goal clip titles and even transfer announcements (i.e., the typical news type sentence structure of past, ("Deschamps has led France...")). Therefore, it appears that the model/rule is based on surface type language and not whether there has actually been any evidence provided to support the claim being made.
 
 **Wrong prediction #2**
 - Text: "10 men and a statue: Portugal are sacrificing another World Cup for Cristiano Ronaldo's ego."
 - True label: hot_take | Predicted: reaction (confidence: 0.45)
-- Analysis: This is a strong opinion with a memorable framing ("10 men and a statue") but no supporting evidence — a classic hot_take. The model predicted reaction, probably because the post reads as an emotional outburst about a specific ongoing situation (Portugal's World Cup campaign). The boundary between an emotional hot_take and a reaction is genuinely hard: both are triggered by a specific event, and the model has apparently collapsed this distinction.
+- Analysis: While this is a strong opinion with a memorable framing ("10 men and a statue"), it lacks supporting evidence and is therefore a classic hot_take. Based on how it appears to be an emotional outburst related to a current event (Portugal's World Cup campaign), the model predicted that it would generate responses. There does appear to be some difficulty distinguishing between an emotional hot_take and a reaction, both seem to get triggered by an event in common, but the model has apparently failed to differentiate between the two.
 
 **Wrong prediction #3**
 - Text: "Arsenal are the first ever team in Premier League history to go the whole season without receiving a red card or conceding a penalty"
 - True label: analysis | Predicted: reaction (confidence: 0.46)
-- Analysis: This is a verifiable historical record — a clear analysis label. The model predicted reaction with near-random confidence (0.46), suggesting it had no real signal to work with. The post has no emotional language or opinion framing at all, yet the model still missed it. This points to a fundamental failure to learn the analysis class: the model likely never developed a reliable representation of what makes a post analytical vs. reactive.
+- Analysis: This is a factual historical record with a clear analysis label. The model predicted reaction nearly random amount of confidence (0.46), indicating that it had no signals to be able to predict the post being an analytical post. The post itself contains neither emotion nor opinion in how it is framed, yet still failed to predict the post as being analytical. This indicates that there is a problem with the model learning the distinction of an analytical post vs. a reactive post in general, or that the model hasn't been able to create a consistent representation of an analytical post vs. a reactive post.
 
 ### Pattern Analysis
 
@@ -187,8 +187,8 @@ This is a labeling and data problem as much as a modeling problem. With only 68 
 
 ## AI Usage
 
-**Instance 1 — Dataset pre-labeling:** I provided Claude with my three label definitions and 261 unlabeled r/soccer posts and asked it to assign one label per post. Claude produced the initial labeled_data.csv. I reviewed the label distribution (reaction: 98, hot_take: 95, analysis: 68) and spot-checked approximately 30 rows manually. I overrode several labels — particularly on posts that Claude labeled as reaction when the post contained a verifiable stat (these should have been analysis). The pre-labeled dataset is the one used for training; all AI assistance is disclosed here.
+**Instance 1 — Dataset pre-labeling:** I gave Claude a set of three label definitions along with 261 unlabeled r/soccer posts in order to assign each of the posts a single label. The result was the initial labeled_data.csv. After reviewing the initial distribution of labeled data (reaction: 98, hot_take: 95, analysis: 68) and sampling approximately thirty rows from the original data, I manually overrode several labels particularly on posts that Claude labeled as reaction when the post contained a verifiable stat. The pre-labeled dataset is the training set; there is a complete disclosure of the use of AI in this process.
 
-**Instance 2 — Label stress-testing:** I asked Claude to generate 5–10 posts that sit at the boundary between hot_take and analysis to test whether my label definitions were precise enough. This produced examples like "Iraq made so many fatal errors — 1 error led to goal 1, another to goal 2." I couldn't classify this cleanly as written, which led me to tighten the decision rule: real analysis requires verifiable evidence, not just a description of what happened. I labeled this example hot_take and added the rule to planning.md before annotating.
+**Instance 2 — Label stress-testing:** I asked Claude to create me between five and ten posts that would represent metaphorically "the hot take and an analysis" to use to evaluate how clear my label definitions were. One of the posts produced was Iraq made so many fatal errors — 1 error led to goal 1, another to goal 2." I could not classify as written so I revised my decision rules for real analysis as in order to be an analysis there must be verifiable proof and not only a description of events. I labeled this hot_take and added the rule into planning.md prior to proceeding with annotating.
 
 **Instance 3 — Failure pattern analysis:** I pasted all 14 wrong predictions into Claude and asked it to identify common patterns. Claude identified that 13/14 wrong predictions were classified as reaction, and that the analysis class was completely missed. I verified this against the confusion matrix (0 correct analysis predictions) and used this pattern as the basis for my reflection section. I overrode Claude's suggestion that "short post length" was a factor — after re-reading the wrong predictions, I concluded the more accurate explanation was that analysis posts resemble reaction posts in surface form, not that they were short.
