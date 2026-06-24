@@ -94,7 +94,7 @@ The Henry quote → **hot_take** (the point is asserted, not argued with evidenc
 
 ## Why These Labels Matter
 
-Members of r/soccer actively distinguish between posts that make real football arguments versus those that just state opinions confidently versus pure emotional reactions to events. These three categories reflect how the community itself evaluates discourse quality — calling out "this is just a hot take" or praising "actually good analysis" is common in comment sections.
+The community of r/soccer actively processes and categorizes posts based on their level of argumentation and reasoning rather than their emotional value. In evaluating quality discourse, members of the r/soccer community often refer back to posts where someone presents an opinion with confidence or a strong reaction. In comments on these posts, members will often call someone out for a “hot take” or offer praise for “real analysis.”
 
 ---
 
@@ -126,11 +126,11 @@ Could be reaction (expressing amusement) or analysis (using a stat to make a poi
 
 I'll use the following metrics to evaluate both the fine-tuned DistilBERT model and the Groq zero-shot baseline:
 
-- **Accuracy** — overall percentage of correct predictions across all three labels. Useful as a quick summary but not enough on its own because it can hide per-class failures.
-- **Per-class F1 score** — the harmonic mean of precision and recall for each label individually. This matters because my dataset isn't perfectly balanced, and I want to know if the model is systematically failing on one label (e.g. always missing hot_take but getting reaction right).
-- **Confusion matrix** — shows exactly which labels are getting mixed up with each other. I expect the hardest boundary to be hot_take vs analysis, so I'll specifically look at how often those two get swapped.
+- **Accuracy** — the percentage of accurate predictions made across the three labels overall. The interpretation of accuracy would provide some basic information, but alone it cannot provide a detailed view with respect to label(s) where predictions may be failing as the model is predicting differently for different labels.
+- **F1 score per class** — a measure of the harmonic mean between precision of predictions received for a given label and the recall rate on that same label. The F1 score is essential due to the fact that my dataset is not perfectly balanced, and I would like to know if the model is consistently failing for one of the three labels (for example; missing "hot_takes" but modeling well for "reactions").
+- **Confusion matrix** — provides insights into exactly which labels have been confused with other labels. I expect the largest boundary confusion will occur between “hot_take” vs. “analysis”, therefore my emphasis is on examining how many times these labels have been confused with one another.
 
-Accuracy alone isn't enough here because a model that just predicts "reaction" for everything would get ~38% accuracy given my distribution — that's not a useful classifier. F1 per class tells me whether the model is actually learning the distinctions.
+A model that predicts “reaction” across the board would ultimately receive an accuracy of ~38% when referencing actual distribution of predictions/responses across voting categories. This cannot serve as an effective model. The per-class F1 score will allow me to evaluate whether or not the model is providing me with any level of distinction across my labels.
 
 ---
 
@@ -149,10 +149,10 @@ For this classifier to be genuinely useful in a real community tool, I'd set the
 ## AI Tool Plan
 
 **Label stress-testing:**
-I used Claude to generate boundary posts between hot_take and analysis — the hardest pair in my taxonomy. Examples like "Iraq made so many fatal errors, 1 error led to goal 1, another led to goal 2" came from this process. Posts I couldn't classify cleanly forced me to tighten the decision rule: real analysis requires verifiable evidence, not just a breakdown of what happened.
+I used Claude to create boundary posts for hot takes versus analysis; this turned out to be the hardest pair in my taxonomy. For example, “Due to multiple major errors in Iraq, one error led to goal 1 and then a second error led to goal 2.” This process also highlighted posts that didn’t clearly fit either category and pushed me to refine the decision rules. After reflecting on it, a valid analysis needs some form of verifiable evidence, rather than just describing the event.
 
 **Annotation assistance:**
-I used Claude to pre-label the full dataset of 261 examples using my label definitions and decision rules. I reviewed the distribution and spot-checked ~30 rows manually to verify the labels made sense. All pre-labeled examples are disclosed here — the full dataset was AI-assisted with human review.
+I used Claude to pre-label a full dataset of 261 examples using my labeling rules and decision criteria. I then checked the distribution and spot-checked around ~30 rows for additional verification. All pre-labeled examples are included in this document, so the dataset is AI-assisted with human review.
 
 **Failure analysis:**
-After running the model, I'll feed the list of wrong predictions to Claude and ask it to identify patterns (e.g. "does it consistently confuse short hot_takes with reactions?" or "does it fail on quotes from experts?"). I'll verify any patterns it identifies by manually reviewing those examples myself before writing up the evaluation.
+Once I run the model, I’ll give Claude the list of incorrect predictions and ask it to identify any patterns (e.g., whether it consistently confuses short hot_takes with short reaction posts, or struggles with quotes from experts). After identifying any patterns, I will manually review those cases to confirm them before writing up my report.
