@@ -2,7 +2,7 @@
 
 ## Community
 
-I'm using r/soccer for this project — it's one of the biggest football communities online with over 8 million members. The community covers match discussions, transfer news, player performance debates, tactical analysis, and fan reactions from leagues and tournaments worldwide. Discourse ranges from detailed statistical and tactical reasoning to immediate emotional responses and unsupported bold opinions, which makes it a good fit for this kind of classification. The three things I'm measuring (analysis, hot_take, reaction) are distinctions that actually come up in that community — people call out bad takes constantly and praise good analysis.
+My project uses r/soccer, one of the largest online soccer communities with more than 8 million members. The subreddit includes discussions about matches, players, and clubs from around the world, along with transfer rumors and ongoing debates about player performance, tactics, and reactions to global leagues and tournaments. Users contribute a mix of analysis, hot_take, and reaction, ranging from detailed breakdowns to immediate emotional responses and unsupported opinions. This makes the community well-suited for classification, since users frequently call out “bad” takes while also praising strong analysis when it appears.
 
 ## Label Taxonomy
 
